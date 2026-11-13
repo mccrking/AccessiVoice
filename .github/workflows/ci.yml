@@ -1,0 +1,22 @@
+name: Validation AccessiVoice
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m venv .venv
+      - run: .\.venv\Scripts\python.exe -m pip install -r requirements.lock.txt
+      - run: npm ci
+      - run: npm run build
+      - run: .\.venv\Scripts\python.exe -m pytest tests -q
+      - run: npx playwright install chromium
+      - run: npm run test:e2e
